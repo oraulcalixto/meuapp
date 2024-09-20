@@ -1,0 +1,189 @@
+<html><head><base href="https://gymapp.com/"><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title>GymApp - Seu Guia de Equipamentos</title><style>
+    body {
+        font-family: Arial, sans-serif;
+        margin: 0;
+        padding: 0;
+        background-color: #f0f0f0;
+    }
+    header {
+        background-color: #333;
+        color: white;
+        text-align: center;
+        padding: 1rem;
+    }
+    nav {
+        display: flex;
+        justify-content: center;
+        background-color: #444;
+        padding: 0.5rem;
+        flex-wrap: wrap;
+    }
+    .muscle-btn, #search-btn {
+        margin: 0.5rem;
+        padding: 0.5rem 1rem;
+        background-color: #007bff;
+        color: white;
+        border: none;
+        border-radius: 5px;
+        cursor: pointer;
+        transition: background-color 0.3s;
+    }
+    .muscle-btn:hover, #search-btn:hover {
+        background-color: #0056b3;
+    }
+    main {
+        padding: 2rem;
+        max-width: 800px;
+        margin: 0 auto;
+    }
+    #equipment-list {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+        gap: 1rem;
+    }
+    .equipment-card {
+        background-color: white;
+        border-radius: 5px;
+        padding: 1rem;
+        box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    }
+    .equipment-card h3 {
+        margin-top: 0;
+    }
+    #add-equipment-form, #search-form {
+        background-color: white;
+        border-radius: 5px;
+        padding: 1rem;
+        margin-top: 2rem;
+    }
+    input, textarea, select {
+        width: 100%;
+        padding: 0.5rem;
+        margin-bottom: 1rem;
+    }
+    button[type="submit"] {
+        background-color: #28a745;
+        color: white;
+        border: none;
+        padding: 0.5rem 1rem;
+        border-radius: 5px;
+        cursor: pointer;
+    }
+    #search-container {
+        display: flex;
+        justify-content: center;
+        margin-top: 1rem;
+    }
+    #search-input {
+        width: 200px;
+        margin-right: 0.5rem;
+    }
+</style></head><body>
+    <header>
+        <h1>GymApp</h1>
+        <p>Seu Guia de Equipamentos de Academia</p>
+    </header>
+    <nav>
+        <button class="muscle-btn" data-muscle="todos">Todos</button>
+        <button class="muscle-btn" data-muscle="peito">Peito</button>
+        <button class="muscle-btn" data-muscle="perna">Perna</button>
+        <button class="muscle-btn" data-muscle="costas">Costas</button>
+        <button class="muscle-btn" data-muscle="ombro">Ombro</button>
+    </nav>
+    <div id="search-container">
+        <input type="number" id="search-input" placeholder="Buscar por número">
+        <button id="search-btn">Buscar</button>
+    </div>
+    <main>
+        <div id="equipment-list"></div>
+        <form id="add-equipment-form">
+            <h2>Adicionar Novo Equipamento</h2>
+            <input type="text" id="equipment-name" placeholder="Nome do Equipamento" required>
+            <input type="number" id="equipment-number" placeholder="Número do Equipamento" required>
+            <select id="equipment-muscle" required>
+                <option value="">Selecione o Músculo</option>
+                <option value="peito">Peito</option>
+                <option value="perna">Perna</option>
+                <option value="costas">Costas</option>
+                <option value="ombro">Ombro</option>
+            </select>
+            <textarea id="equipment-description" placeholder="Descrição do Equipamento" required></textarea>
+            <input type="url" id="equipment-video" placeholder="URL do Vídeo Demonstrativo">
+            <button type="submit">Adicionar Equipamento</button>
+        </form>
+    </main>
+    <script>
+        let equipments = [];
+
+        function addEquipment(event) {
+            event.preventDefault();
+            const name = document.getElementById('equipment-name').value;
+            const number = document.getElementById('equipment-number').value;
+            const muscle = document.getElementById('equipment-muscle').value;
+            const description = document.getElementById('equipment-description').value;
+            const video = document.getElementById('equipment-video').value;
+
+            const newEquipment = { name, number, muscle, description, video };
+            equipments.push(newEquipment);
+            renderEquipments();
+            event.target.reset();
+        }
+
+        function renderEquipments(muscle = null) {
+            const equipmentList = document.getElementById('equipment-list');
+            equipmentList.innerHTML = '';
+            
+            const filteredEquipments = muscle && muscle !== 'todos'
+                ? equipments.filter(eq => eq.muscle === muscle)
+                : equipments;
+
+            filteredEquipments.forEach(eq => {
+                const card = document.createElement('div');
+                card.className = 'equipment-card';
+                card.innerHTML = `
+                    <h3>${eq.number} - ${eq.name}</h3>
+                    <p><strong>Músculo:</strong> ${eq.muscle}</p>
+                    <p>${eq.description}</p>
+                    ${eq.video ? `<a href="${eq.video}" target="_blank">Ver vídeo demonstrativo</a>` : ''}
+                `;
+                equipmentList.appendChild(card);
+            });
+        }
+
+        function searchByNumber() {
+            const searchNumber = document.getElementById('search-input').value;
+            if (searchNumber) {
+                const foundEquipment = equipments.find(eq => eq.number === searchNumber);
+                if (foundEquipment) {
+                    renderEquipments();
+                    const equipmentList = document.getElementById('equipment-list');
+                    equipmentList.innerHTML = '';
+                    const card = document.createElement('div');
+                    card.className = 'equipment-card';
+                    card.innerHTML = `
+                        <h3>${foundEquipment.number} - ${foundEquipment.name}</h3>
+                        <p><strong>Músculo:</strong> ${foundEquipment.muscle}</p>
+                        <p>${foundEquipment.description}</p>
+                        ${foundEquipment.video ? `<a href="${foundEquipment.video}" target="_blank">Ver vídeo demonstrativo</a>` : ''}
+                    `;
+                    equipmentList.appendChild(card);
+                } else {
+                    alert('Equipamento não encontrado');
+                }
+            }
+        }
+
+        document.getElementById('add-equipment-form').addEventListener('submit', addEquipment);
+
+        document.querySelectorAll('.muscle-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                renderEquipments(btn.dataset.muscle);
+            });
+        });
+
+        document.getElementById('search-btn').addEventListener('click', searchByNumber);
+
+        // Inicialização
+        renderEquipments();
+    </script>
+</body></html>
